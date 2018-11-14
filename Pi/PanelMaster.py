@@ -15,9 +15,9 @@ BLACK_PIXEL = [0x0, 0x0, 0x0]
 
 
 panel1 = Panel(bus, 0x04)
-#panel2 = Panel(bus, 0x05)
+panel2 = Panel(bus, 0x05)
 
-panels = [[panel1]]
+panels = [[panel1,panel2]]
     
 #panel.fill_rect([0,0], [32,32], WHITE_PIXEL)
 
