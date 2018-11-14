@@ -1,0 +1,85 @@
+<html>
+	<head>
+		<style>
+		table{
+			border-collapse:collapse;
+		}
+
+		td {
+			border: 0.05px solid black;
+			border-collapse: collapse;
+			border-spacing: 0px;
+			padding: 10px;
+		}
+		</style>
+		<script type="text/javascript">
+			function setConfig(){
+                var mapData = new Array();
+                for(var i = 0; i < activeGrid.length; i++){
+                    for(var j = 0; j < activeGrid.length; j++){
+                        if(activeGrid[i][j]){
+                            mapData[mapData.length] = [j,i];
+                        }
+                    }
+                }
+                
+				var url = "/set_shape/"
+                url = url + JSON.stringify(mapData);
+                
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+				    if (this.readyState == 4 && this.status == 200) {}
+				};
+				xhttp.open("POST", url, true);
+				xhttp.send();
+			}
+
+			function gridOnClick(grid){
+				var r = grid.getAttribute("r");
+				var c = grid.getAttribute("c");
+				activeGrid[r][c] = !activeGrid[r][c];
+
+				if(activeGrid[r][c]){
+					grid.style.backgroundColor = "green";
+				}else{
+					grid.style.backgroundColor = "red";
+				}
+			}
+
+			function addGridListener(grid){
+				grid.addEventListener("click", function(){gridOnClick(grid);});
+			}
+		</script>
+	</head>
+	<body>
+		<table id="theTable"></table>
+		<script>
+			var maxX = 15;
+			var maxY = 15;
+
+			var table = document.getElementById("theTable");
+			var grids = new Array();
+
+			var activeGrid = new Array(); 
+
+			//create grids in html
+			for(var r = 0; r < maxX; r++){
+				grids[r] = new Array();
+                activeGrid[r] = new Array();
+				var row = table.insertRow(table.rows.length);
+				for(var c = 0; c < maxY; c++){
+					grids[r][c] = row.insertCell(c);
+					activeGrid[r][c] = false;
+					var SPACE = document.createTextNode("");
+					grids[r][c].appendChild(SPACE);
+					grids[r][c].setAttribute("c", c);
+					grids[r][c].setAttribute("r", r);
+					addGridListener(grids[r][c]);
+					grids[r][c].style.backgroundColor = "red";
+				}
+			}
+		</script>
+		<br>
+		<button onclick="setConfig()">Set Configuration</button>
+	</body>
+</html>
