@@ -17,6 +17,6 @@ Panels are entered into a 2D list which _should_ match the configuration on the 
 ## Arduino
 Each panel is driven by an Arduino Uno or Arduino Mega with the [RGBMatrixPanel](https://github.com/adafruit/RGB-matrix-Panel) library from Adafruit.
 
-Each Arduino must have a unique I2C address assigned to it on `line 22` of [Arduino/MatrixPanel/MatrixPanel.ino](MatrixPanel.ino).  Addresses must lie within the range of 0x04 and 0x7F and must be unique between panels. 
+Each Arduino must have a unique I2C address assigned to it on `line 22` of [MatrixPanel.ino](Arduino/MatrixPanel/MatrixPanel.ino).  Addresses must lie within the range of 0x04 and 0x7F and must be unique between panels. 
 
 New panels can be made using the guide over at [Adafruit](https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/overview).
