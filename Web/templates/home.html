@@ -18,6 +18,8 @@
 		//max numbers of grids
 		var maxX = 15;
 		var maxY = 15;
+        var animating = false;
+        var animationDelay = 100;
 
 		//width of each individual square grid
 		var gridWidth = 32;
@@ -100,7 +102,7 @@
 
 		//updates grids based on given data
 		function updateGrid(data){
-			var gridData = JSON.parse(data);
+			var gridData = data;
 			for(var x = 0; x < maxX; x++){
 				for(var y = 0; y < maxY; y++){
 					if(gridData[x][y] == 0){
@@ -115,17 +117,64 @@
 
 		//Get the grid data from the backend
 		function getGridData(){
+            animating = false;
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 			    if (this.readyState == 4 && this.status == 200) {
-			       updateGrid(xhttp.responseText);
+                    animateButton.disabled = false;
+                    updateGrid(JSON.parse(xhttp.responseText));
 			    }
 			};
 			xhttp.open("GET", "/get_grid", true);
 			xhttp.send();
 		}
 
-		
+		function animateGrid(gridData){
+            if(!animating){
+                return;
+            }
+            
+            updateGrid(gridData);
+            for(var y = 0; y < maxY; y++){
+                var toSwap = null;
+                var firstX;
+				for(var x = 0; x < maxX; x++){
+					if(gridData[x][y] != 0){
+                        if(toSwap != null){
+                            var tempGrid = gridData[x][y];
+                            gridData[x][y] = toSwap;
+                            toSwap = tempGrid;
+                        }else{
+				            toSwap = gridData[x][y];
+                            firstX = x;
+                        }
+					}
+				}
+                
+                if(toSwap != null){
+                    gridData[firstX][y] = toSwap;
+                }
+			}
+            
+            setTimeout(function(){animateGrid(gridData);}, animationDelay);
+        }
+        
+        function animateStart(){
+            animating = true;
+            animationDelay = delayInput.value;
+            animateButton.disabled = true;
+            
+            var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+                    var gridData = JSON.parse(xhttp.responseText);
+                    animateGrid(gridData);
+			    }
+			};
+			xhttp.open("GET", "/get_grid", true);
+			xhttp.send();
+        }
+        
 		//updateGrid();
 		//setInterval(getGridData, 10000);
 	</script>
@@ -137,6 +186,12 @@
 	<input type="color" value="#000000" id="colorWell">
 	<br/><br/>
 	<button onclick="getGridData()">Refresh Place Data</button>
+	<br/><br/>
+	<button onclick="animateStart()" id="animateButton">Animate Place</button>
+	<label for="animationDelay">Delay:</label>
+	<input type=number id="animationDelay" value="100"/>
+	<br/><br/>
+	<a href="/history">View History</a>
 	<br/><br/>
 	<script>
 		colorWell = document.querySelector("#colorWell");
@@ -162,6 +217,8 @@
 	<script>
 	var table = document.getElementById("theTable");
 	var grids = new Array();
+    var delayInput = document.getElementById("animationDelay");
+    var animateButton = document.getElementById("animateButton");
 
 	var gridsDatas = new Array(maxX);
 	for(var r = 0; r < maxX; r++){

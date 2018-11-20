@@ -1,0 +1,92 @@
+<html>
+
+<head>
+	<title>VML/Place/History</title>
+	<style>
+		table{
+			border-collapse:collapse;
+		}
+
+		td.inner {
+			border: 0.05px solid black;
+			border-collapse: collapse;
+			border-spacing: 0px;
+			padding: 5px;
+		}
+	</style>
+	<script>
+		//max numbers of grids
+		var maxX = 15;
+		var maxY = 15;
+
+		//width of each individual square grid
+		var gridWidth = 32;
+
+		//Creates a 32x32 grid of pixels, at grid coordinates
+		function createGrid(gridX, gridY){
+			var tbl = document.createElement("table");
+			gridsDatas[gridX][gridY] = new Array();
+			for (var x = 0; x < gridWidth; x++){
+				var thisRow = tbl.insertRow(tbl.rows.length);
+				gridsDatas[gridX][gridY][x] = new Array();
+				for(var y = 0; y < gridWidth; y++){
+					var thisCol = thisRow.insertCell(y);
+					thisCol.classList.add("inner");
+					var txt = document.createTextNode('');
+					thisCol.appendChild(txt);
+					thisCol.setAttribute("gridX", gridX);
+					thisCol.setAttribute("gridY", gridY);
+					thisCol.setAttribute("pX", y);
+					thisCol.setAttribute("pY", x);
+					gridsDatas[gridX][gridY][x][y] = thisCol;
+                    gridsDatas[gridX][gridY][x][y].style.backgroundColor = "black";
+				}
+			}
+			return tbl;
+		}
+
+		//Get the grid data from the backend
+		function getHistoryData(){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+			    if (this.readyState == 4 && this.status == 200) {
+                    //updateGrid(JSON.parse(xhttp.responseText));
+			    }
+			};
+			xhttp.open("GET", "/get_history", true);
+			xhttp.send();
+		}
+        
+		//updateGrid();
+		//setInterval(getGridData, 10000);
+	</script>
+</head>
+
+<body>
+	<h1>VML/Place/History</h1>
+	<a href="/"><</a>
+	<br/>
+	<table class="outer" id="theTable"></table>
+	<script>
+	var table = document.getElementById("theTable");
+	var grids = new Array();
+
+	var gridsDatas = new Array(maxX);
+	for(var r = 0; r < maxX; r++){
+		gridsDatas[r] = new Array(maxY);
+	}
+
+	//create grids in html
+	for(var r = 0; r < maxX; r++){
+		grids[r] = new Array();
+		var row = table.insertRow(table.rows.length);
+		for(var c = 0; c < maxY; c++){
+			grids[r][c] = row.insertCell(c);
+			var gr = createGrid(c, r);
+			grids[r][c].appendChild(gr);
+		}
+	}
+	</script>
+</body>
+
+</html>

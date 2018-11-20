@@ -5,13 +5,15 @@ from threading import Lock
 
 app = Flask(__name__)
 
-start_grid = [[0 for x in range(15)] for y in range(15)]
-start_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
-outFile = open("grid_data", "w")
-outFile.write(json.dumps(start_grid))
-outFile.close()
+if __name__ == "__main__":
+    start_grid = [[0 for x in range(15)] for y in range(15)]
+    start_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
+    outFile = open("grid_data", "w")
+    outFile.write(json.dumps(start_grid))
+    outFile.close()
 
 lock = Lock()
+lock_history = Lock()
 
 @app.route("/")
 def hello():
@@ -20,6 +22,10 @@ def hello():
 @app.route("/spimewrangler")
 def wrangle():
     return render_template("wrangle.html")
+
+@app.route("/history")
+def history():
+    return render_template("history.html")
 
 @app.route("/set_shape/<shape>", methods=['POST'])
 def set_shape(shape):
@@ -57,7 +63,18 @@ def set_pixel(grid_data, coordinate, rgb):
         outFile = open("grid_data", "w")
         outFile.write(json.dumps(active_grid))
         outFile.close()
+    with lock_history:
+        outFile = open("grid_history", "a")
+        outFile.write(grid_data + "/" + coordinate + "/" + rgb)
+        outFile.close()
     return "Good"
+
+@app.route("/get_history")
+def get_history():
+    inFile = open("grid_history")
+    data = str(inFile.readlines())
+    inFile.close()
+    return data
 
 @app.route("/get_grid")
 def get_grid():
