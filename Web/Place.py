@@ -43,7 +43,7 @@ def set_shape(shape):
                     if active_grid[y][x] == 0:
                         active_grid[y][x] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
                 else:
-                    active_grid[x][y] = 0
+                    active_grid[y][x] = 0
         outFile = open("grid_data", "w")
         outFile.write(json.dumps(active_grid))
         outFile.close()
