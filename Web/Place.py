@@ -8,9 +8,8 @@ app = Flask(__name__)
 if __name__ == "__main__":
     start_grid = [[0 for x in range(15)] for y in range(15)]
     start_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
-    outFile = open("grid_data", "w")
-    outFile.write(json.dumps(start_grid))
-    outFile.close()
+    with open("grid_data", "w") as outFile:
+        outFile.write(json.dumps(start_grid))
 
 lock = Lock()
 lock_history = Lock()
@@ -34,9 +33,9 @@ def set_shape(shape):
     print(data)
     #TODO
     with lock:
-        inFile = open("grid_data")
-        active_grid = json.loads(inFile.readline())
-        inFile.close()
+        with open("grid_data") as inFile:
+            active_grid = json.loads(inFile.readline())
+        
         for x in range(15):
             for y in range(15):
                 if [x,y] in data:
@@ -44,9 +43,8 @@ def set_shape(shape):
                         active_grid[y][x] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
                 else:
                     active_grid[y][x] = 0
-        outFile = open("grid_data", "w")
-        outFile.write(json.dumps(active_grid))
-        outFile.close()
+        with open("grid_data", "w") as outFile:
+            outFile.write(json.dumps(active_grid))
     return "Good"
     
 @app.route("/set_pixel/<grid_data>/<coordinate>/<rgb>", methods=['POST'])
@@ -56,30 +54,29 @@ def set_pixel(grid_data, coordinate, rgb):
     grid = [int(x) for x in grid_data.split(",")]
     cord = [int(x) for x in coordinate.split(",")]
     with lock:
-        inFile = open("grid_data")
-        active_grid = json.loads(inFile.readline())
-        inFile.close()
+        with open("grid_data") as inFile:
+            try:
+                active_grid = json.loads(inFile.readline())
+            except:
+                active_grid = [[0 for x in range(15)] for y in range(15)]
+                active_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
         active_grid[grid[1]][grid[0]][cord[0]][cord[1]] = [int(x) for x in rgb.split(",")]
-        outFile = open("grid_data", "w")
-        outFile.write(json.dumps(active_grid))
-        outFile.close()
+        with open("grid_data", "w") as outFile:
+            outFile.write(json.dumps(active_grid))
     with lock_history:
-        outFile = open("grid_history", "a")
-        outFile.write(grid_data + "/" + coordinate + "/" + rgb)
-        outFile.close()
+        with open("grid_history", "a") as outFile:
+            outFile.write(grid_data + "/" + coordinate + "/" + rgb + "\n")
     return "Good"
 
 @app.route("/get_history")
 def get_history():
-    inFile = open("grid_history")
-    data = str(inFile.readlines())
-    inFile.close()
+    with open("grid_history") as inFile:
+        data = str(inFile.readlines())
     return data
 
 @app.route("/get_grid")
 def get_grid():
     #returns the grid config and data
-    inFile = open("grid_data")
-    active_grid = inFile.readline()
-    inFile.close()
+    with open("grid_data") as inFile:
+        active_grid = inFile.readline()
     return active_grid
