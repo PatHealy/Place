@@ -222,7 +222,8 @@
         
         function sendGridData(){
             if(gridToSend.length == 0){return;}
-            var url = "/set_pixels/" + JSON.stringify(gridToSend);
+            var url = "/set_pixels";
+            var data = JSON.stringify(gridToSend);
             gridToSend = new Array();
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
@@ -231,7 +232,7 @@
                 }
             };
             xhttp.open("POST", url, true);
-            xhttp.send();
+            xhttp.send(data);
         }
         
 		//updateGrid();

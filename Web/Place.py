@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 if __name__ == "__main__":
     start_grid = [[0 for x in range(15)] for y in range(15)]
-    start_grid[0][0] = [[[255 for x in range(3)] for y in range(32)] for z in range(32)]
-    start_grid[0][1] = [[[255 for x in range(3)] for y in range(32)] for z in range(32)]
+    start_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
+    start_grid[0][1] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
     with open("grid_data", "w") as outFile:
         outFile.write(json.dumps(start_grid))
 
@@ -48,10 +48,10 @@ def set_shape(shape):
             outFile.write(json.dumps(active_grid))
     return "Good"
 
-@app.route("/set_pixels/<data>", methods=['POST'])
-def set_pixels(data):
+@app.route("/set_pixels", methods=['POST'])
+def set_pixels():
     #sets a pixels to a given color
-    changeData = json.loads(data)
+    changeData = json.loads(request.data)
     historyString = ""
     
     with lock:
@@ -86,8 +86,12 @@ def set_pixels(data):
 @app.route("/get_history")
 def get_history():
     with open("grid_history") as inFile:
-        data = str(inFile.readlines())
-    return data
+        data = inFile.readlines()
+    outData = []
+    print(data)
+    for d in data:
+        outData.append(json.loads(d[:-1]))
+    return json.dumps(outData)
 
 @app.route("/get_grid")
 def get_grid():

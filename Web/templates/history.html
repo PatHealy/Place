@@ -21,6 +21,9 @@
 
 		//width of each individual square grid
 		var gridWidth = 32;
+        var currentEntry = 0;
+        var theHistory = new Array();
+        var delay = 400;
 
 		//Creates a 32x32 grid of pixels, at grid coordinates
 		function createGrid(gridX, gridY){
@@ -45,17 +48,48 @@
 			return tbl;
 		}
 
+        function clearGrid(){
+            for(gridX = 0; gridX < 15; gridX++){
+                for(gridY = 0; gridY < 15; gridY++){
+                    for (var x = 0; x < 32; x++){
+                        for(var y = 0; y < 32; y++){
+                            gridsDatas[gridX][gridY][x][y].style.backgroundColor = "black";
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateGrid(){
+            if(currentEntry < theHistory.length){
+                var ge = theHistory[currentEntry];
+                var co = ge[4];
+                gridsDatas[ge[0]][ge[1]][ge[2]][ge[3]].style.backgroundColor = "#" + co[0].toString(16) + co[1].toString(16) + co[2].toString(16);
+                currentEntry++;
+                setTimeout(updateGrid, delay);
+            }
+            else{
+                currentEntry = 0;
+                clearGrid();
+                setTimeout(updateGrid, delay);
+            }
+        }
+
 		//Get the grid data from the backend
 		function getHistoryData(){
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 			    if (this.readyState == 4 && this.status == 200) {
-                    //updateGrid(JSON.parse(xhttp.responseText));
+                    currentEntry = 0;
+                    console.log(xhttp.responseText);
+                    theHistory = JSON.parse(xhttp.responseText);
+                    updateGrid();
 			    }
 			};
 			xhttp.open("GET", "/get_history", true);
 			xhttp.send();
 		}
+        
         
 		//updateGrid();
 		//setInterval(getGridData, 10000);
@@ -86,6 +120,8 @@
 			grids[r][c].appendChild(gr);
 		}
 	}
+        
+    getHistoryData();
 	</script>
 </body>
 
