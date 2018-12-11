@@ -41,6 +41,7 @@ while True:
                         for j in range(len(grid[i])):
                             if not color_grid[x][y] == grid[j][i]:
                                 panels[x][y].draw_pixel([j, i], grid[j][i])
+                                color_grid[x][y] = grid[j][i]
                                 time.sleep(0.0001)
                                 ticked = True
                                 ticks = 0
