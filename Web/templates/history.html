@@ -1,21 +1,61 @@
 <html>
 
 <head>
-	<title>VML/Place/History</title>
-	<style>
-		table{
+    <title>VML/Place/History</title>
+    <style>
+        table{
 			border-collapse:collapse;
+            width:100%;
+            height: 100%;
 		}
 
 		td.inner {
 			border: 0.05px solid black;
 			border-collapse: collapse;
 			border-spacing: 0px;
-			padding: 5px;
+			
 		}
+        .slidecontainer {
+          width: 100%; /* Width of the outside container */
+        }
+
+        /* The slider itself */
+        .slider {
+          -webkit-appearance: none;  /* Override default CSS styles */
+          appearance: none;
+          width: 100%; /* Full-width */
+          height: 25px; /* Specified height */
+          background: #d3d3d3; /* Grey background */
+          outline: none; /* Remove outline */
+          opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+          -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+          transition: opacity .2s;
+        }
+
+        /* Mouse-over effects */
+        .slider:hover {
+          opacity: 1; /* Fully shown on mouse-over */
+        }
+
+        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
+        .slider::-webkit-slider-thumb {
+          -webkit-appearance: none; /* Override default look */
+          appearance: none;
+          width: 25px; /* Set a specific slider handle width */
+          height: 25px; /* Slider handle height */
+          background: #4CAF50; /* Green background */
+          cursor: pointer; /* Cursor on hover */
+        }
+
+        .slider::-moz-range-thumb {
+          width: 25px; /* Set a specific slider handle width */
+          height: 25px; /* Slider handle height */
+          background: #4CAF50; /* Green background */
+          cursor: pointer; /* Cursor on hover */
+        }
 	</style>
-	<script>
-		//max numbers of grids
+    <script>
+        //max numbers of grids
 		var maxX = 15;
 		var maxY = 15;
 
@@ -35,8 +75,8 @@
 				for(var y = 0; y < gridWidth; y++){
 					var thisCol = thisRow.insertCell(y);
 					thisCol.classList.add("inner");
-					var txt = document.createTextNode('');
-					thisCol.appendChild(txt);
+					//var txt = document.createTextNode('');
+					//thisCol.appendChild(txt);
 					thisCol.setAttribute("gridX", gridX);
 					thisCol.setAttribute("gridY", gridY);
 					thisCol.setAttribute("pX", y);
@@ -60,19 +100,30 @@
             }
         }
         
-        function updateGrid(){
+        function updateGrid(){       
             if(currentEntry < theHistory.length){
                 var ge = theHistory[currentEntry];
                 var co = ge[4];
-                gridsDatas[ge[0]][ge[1]][ge[2]][ge[3]].style.backgroundColor = "#" + co[0].toString(16) + co[1].toString(16) + co[2].toString(16);
+                var coS = new Array();
+                
+                for(var i = 0; i < 3; i++){
+                    coS[i] = co[i].toString(16);
+                    if(coS[i].length == 1){
+                        coS[i] = "0" + coS[i];
+                    }
+                }
+                
+                gridsDatas[ge[0]][ge[1]][ge[3]][ge[2]].style.backgroundColor = "#" + coS[0] + coS[1] + coS[2];
                 currentEntry++;
-                setTimeout(updateGrid, delay);
+                dateBlock.textContent = "Current Pixel Date: " + ge[5];
             }
             else{
                 currentEntry = 0;
                 clearGrid();
-                setTimeout(updateGrid, delay);
+                dateBlock.textContent = "Current Pixel Date: ";
             }
+            
+            setTimeout(updateGrid, delay);
         }
 
 		//Get the grid data from the backend
@@ -97,32 +148,48 @@
 </head>
 
 <body>
-	<h1>VML/Place/History</h1>
-	<a href="/"><</a>
-	<br/>
-	<table class="outer" id="theTable"></table>
-	<script>
-	var table = document.getElementById("theTable");
-	var grids = new Array();
+    <h1>VML/Place/History</h1>
+    <a href="/">
+        <</a>
+           <h3>Time Speed</h3>
+            <div class="slidecontainer">
+                <input type="range" min="1" max="1000" value="600" class="slider" id="myRange">
+            </div>
+            <br />
+            <h3 id="theDate">Current Pixel Date: </h3>
+            <table class="outer" id="theTable"></table>
+            <script>
+                var table = document.getElementById("theTable");
+                var dateBlock = document.getElementById("theDate");
+                var grids = new Array();
 
-	var gridsDatas = new Array(maxX);
-	for(var r = 0; r < maxX; r++){
-		gridsDatas[r] = new Array(maxY);
-	}
+                var gridsDatas = new Array(maxX);
+                for (var r = 0; r < maxX; r++) {
+                    gridsDatas[r] = new Array(maxY);
+                }
 
-	//create grids in html
-	for(var r = 0; r < maxX; r++){
-		grids[r] = new Array();
-		var row = table.insertRow(table.rows.length);
-		for(var c = 0; c < maxY; c++){
-			grids[r][c] = row.insertCell(c);
-			var gr = createGrid(c, r);
-			grids[r][c].appendChild(gr);
-		}
-	}
-        
-    getHistoryData();
-	</script>
+                //create grids in html
+                for (var r = 0; r < maxX; r++) {
+                    grids[r] = new Array();
+                    var row = table.insertRow(table.rows.length);
+                    for (var c = 0; c < maxY; c++) {
+                        grids[r][c] = row.insertCell(c);
+                        var gr = createGrid(c, r);
+                        grids[r][c].appendChild(gr);
+                    }
+                }
+                
+                var slider = document.getElementById("myRange");
+
+                // Update the current slider value (each time you drag the slider handle)
+                slider.oninput = function() {
+                    console.log((1000 - this.value) * 0.3);
+                    delay = (1000 - this.value) * 0.3;
+                }
+
+                getHistoryData();
+
+            </script>
 </body>
 
 </html>

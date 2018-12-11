@@ -2,6 +2,7 @@
 from flask import Flask, request, session, url_for, redirect, render_template, abort, g, flash, _app_ctx_stack
 import json
 from threading import Lock
+import datetime
 
 app = Flask(__name__)
 
@@ -33,6 +34,7 @@ def set_shape(shape):
     data = json.loads(shape)
     print(data)
     #TODO
+    historyStr = ""
     with lock:
         with open("grid_data") as inFile:
             active_grid = json.loads(inFile.readline())
@@ -41,11 +43,19 @@ def set_shape(shape):
             for y in range(15):
                 if [x,y] in data:
                     if active_grid[y][x] == 0:
-                        active_grid[y][x] = [[[255 for x in range(3)] for y in range(32)] for z in range(32)]
+                        active_grid[y][x] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
+                        for i in range(32):
+                            for j in range(32):
+                                historyStr = historyStr + str([x, y, i, j, [0,0,0], datetime.datetime.today().strftime('%m-%d-%Y')]) + "\n"
                 else:
                     active_grid[y][x] = 0
+                    
         with open("grid_data", "w") as outFile:
             outFile.write(json.dumps(active_grid))
+    if len(historyStr) > 0:
+        with lock_history:
+            with open("grid_history", "a") as outFile:
+                outFile.write(historyStr)
     return "Good"
 
 @app.route("/set_pixels", methods=['POST'])
@@ -72,6 +82,7 @@ def set_pixels():
         for entry in changeData:
             try:
                 active_grid[entry[1]][entry[0]][entry[2]][entry[3]] = entry[4]
+                entry.append(datetime.datetime.today().strftime('%m-%d-%Y'))
                 historyString += json.dumps(entry) + "\n"
             except:
                 print(entry)
@@ -88,9 +99,9 @@ def get_history():
     with open("grid_history") as inFile:
         data = inFile.readlines()
     outData = []
-    print(data)
     for d in data:
         outData.append(json.loads(d[:-1]))
+    #print(outData)
     return json.dumps(outData)
 
 @app.route("/get_grid")
