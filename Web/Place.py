@@ -7,9 +7,7 @@ import datetime
 app = Flask(__name__)
 
 if __name__ == "__main__":
-    start_grid = [[0 for x in range(15)] for y in range(15)]
-    start_grid[0][0] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
-    start_grid[0][1] = [[[0 for x in range(3)] for y in range(32)] for z in range(32)]
+    start_grid = [[(0,0,0) for x in range(128)] for y in range(2)]
     with open("grid_data", "w") as outFile:
         outFile.write(json.dumps(start_grid))
 
@@ -69,9 +67,7 @@ def set_pixels():
             try:
                 active_grid = json.loads(inFile.readline())
             except JSONDecodeError:
-                active_grid = [[0 for x in range(15)] for y in range(15)]
-                active_grid[0][0] = [[[255 for x in range(3)] for y in range(32)] for z in range(32)]
-                start_grid[0][1] = [[[255 for x in range(3)] for y in range(32)] for z in range(32)]
+                active_grid = [[(0,0,0) for x in range(128)] for y in range(2)]
                 with open("grid_data", "w") as outFile:
                     outFile.write(json.dumps(active_grid))
                 print("OOPS")
